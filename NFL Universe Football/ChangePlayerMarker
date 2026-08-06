@@ -1,0 +1,69 @@
+local workspace = game:GetService("Workspace")
+
+-- ================= CONFIGURATION VALUES =================
+local FADE_COLOR        = Color3.fromRGB(255, 170, 255)
+local FADE_2_COLOR      = Color3.fromRGB(255, 0, 255)
+local STAMINA_TEXT_COLOR = Color3.fromRGB(85, 0, 255)
+
+local STAMINA_GRADIENT_KEYS = {
+	ColorSequenceKeypoint.new(0, Color3.new(0.333333, 0, 0.498039)),
+	ColorSequenceKeypoint.new(0.494, Color3.new(0.666667, 1, 0)),
+	ColorSequenceKeypoint.new(0.499, Color3.new(0.666667, 1, 0)),
+	ColorSequenceKeypoint.new(0.501, Color3.new(0.27451, 0.27451, 0.27451)),
+	ColorSequenceKeypoint.new(0.502, Color3.new(0.27451, 0.27451, 0.27451)),
+	ColorSequenceKeypoint.new(1, Color3.new(0.27451, 0.27451, 0.27451))
+}
+-- ========================================================
+
+-- Navigate through the specified hierarchy safely
+local gamesFolder = workspace:FindFirstChild("Games")
+if not gamesFolder then return end
+
+-- Find the only model inside the Games folder
+local targetModel
+for _, child in ipairs(gamesFolder:GetChildren()) do
+	if child:IsA("Model") then
+		targetModel = child
+		break
+	end
+end
+if not targetModel then return end
+
+local localModel = targetModel:FindFirstChild("Local")
+if not localModel or not localModel:IsA("Model") then return end
+
+local playerMarker = localModel:FindFirstChild("PlayerMarker")
+if not playerMarker then return end
+
+local surfaceGui = playerMarker:FindFirstChild("SurfaceGui")
+if not surfaceGui then return end
+
+local container = surfaceGui:FindFirstChild("Container")
+if not container then return end
+
+-- 1. Modify Fade > ImageColor3
+local fade = container:FindFirstChild("Fade")
+if fade and (fade:IsA("ImageLabel") or fade:IsA("ImageButton")) then
+	fade.ImageColor3 = FADE_COLOR
+end
+
+-- 2. Modify Fade 2 > ImageColor3
+local fade2 = container:FindFirstChild("Fade 2")
+if fade2 and (fade2:IsA("ImageLabel") or fade2:IsA("ImageButton")) then
+	fade2.ImageColor3 = FADE_2_COLOR
+end
+
+-- 3. Modify Stamina > UIGradient
+local stamina = container:FindFirstChild("Stamina")
+if stamina then
+	local uiGradient = stamina:FindFirstChildOfClass("UIGradient")
+	if uiGradient then
+		uiGradient.Color = ColorSequence.new(STAMINA_GRADIENT_KEYS)
+	end
+end
+
+-- 4. Modify StaminaText > ImageColor3
+local staminaText = container:FindFirstChild("StaminaText")
+if staminaText and (staminaText:IsA("ImageLabel") or staminaText:IsA("ImageButton")) then
+	staminaText.ImageColor3 = STAMINA_TEXT_COLOR
+end
