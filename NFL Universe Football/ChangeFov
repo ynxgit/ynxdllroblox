@@ -1,0 +1,14 @@
+local workspace = game:GetService("Workspace")
+local runService = game:GetService("RunService")
+
+-- ================= CONFIGURATION VALUES =================
+local TARGET_FOV = 120
+-- ========================================================
+
+-- Continuously check and enforce the Field of View on every frame
+runService.RenderStepped:Connect(function()
+	local camera = workspace.CurrentCamera
+	if camera and camera.FieldOfView ~= TARGET_FOV then
+		camera.FieldOfView = TARGET_FOV
+	end
+end)
