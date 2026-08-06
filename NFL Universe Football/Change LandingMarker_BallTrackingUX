@@ -1,0 +1,73 @@
+local workspace = game:GetService("Workspace")
+
+-- ================= CONFIGURATION VALUES =================
+local BEAM_COLOR_SEQUENCE = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.new(0.333333, 0, 0.498039)),
+	ColorSequenceKeypoint.new(1, Color3.new(1, 0, 1))
+})
+
+local CIRCLE_COLOR_SEQUENCE = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.new(0.333333, 0, 0.498039)),
+	ColorSequenceKeypoint.new(1, Color3.new(1, 0.333333, 1))
+})
+-- ========================================================
+
+-- Navigate through the specified hierarchy safely
+local gamesFolder = workspace:FindFirstChild("Games")
+if not gamesFolder then return end
+
+-- Find the only model inside the Games folder
+local targetModel
+for _, child in ipairs(gamesFolder:GetChildren()) do
+	if child:IsA("Model") then
+		targetModel = child
+		break
+	end
+end
+if not targetModel then return end
+
+local localModel = targetModel:FindFirstChild("Local")
+if not localModel or not localModel:IsA("Model") then return end
+
+local trackingUX = localModel:FindFirstChild("LandingMarker_BallTrackingUX")
+if not trackingUX then return end
+
+-- 1. Change Beam Color
+local beam = trackingUX:FindFirstChildOfClass("Beam")
+if beam then
+	beam.Color = BEAM_COLOR_SEQUENCE
+end
+
+-- 2. Go to GroundCenter and change Circle 1, Circle 2, Circle 3
+local groundCenter = trackingUX:FindFirstChild("GroundCenter")
+if groundCenter then
+	local circleNames = {"Circle 1", "Circle 2", "Circle 3"}
+	
+	for _, circleName in ipairs(circleNames) do
+		local circle = groundCenter:FindFirstChild(circleName)
+		if circle then
+			-- Check if it's a BasePart (like a cylinder/mesh) with a ColorSequence/Color3 or a UI element
+			if circle:IsA("BasePart") then
+				-- If it uses a particle emitter or something similar inside, or we want to change its BrickColor/Color
+				-- Usually these circles might have a UIGradient or ParticleEmitter, but if it's a BasePart, we can color it or look for gradients.
+				-- Let's check for UIGradient or ParticleEmitter first, otherwise set Color if it's a part.
+				local gradient = circle:FindFirstChildOfClass("UIGradient")
+				if gradient then
+					gradient.Color = CIRCLE_COLOR_SEQUENCE
+				end
+			-- If it's a UI element (like a BillboardGui / SurfaceGui component)
+			elseif circle:IsA("GuiObject") then
+				local gradient = circle:FindFirstChildOfClass("UIGradient")
+				if gradient then
+					gradient.Color = CIRCLE_COLOR_SEQUENCE
+				end
+			end
+			
+			-- Also check for any UIGradient directly inside the part/object
+			local directGradient = circle:FindFirstChildOfClass("UIGradient")
+			if directGradient then
+				directGradient.Color = CIRCLE_COLOR_SEQUENCE
+			end
+		end
+	end
+end
